@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Generales 29N · Cifras y Papeletas</title>
+    <meta
+      name="description"
+      content="Elecciones generales del 29 de noviembre de 2026: ¿siguen los votos la Ley de Benford? Avance hora a hora."
+    />
+    <meta name="author" content="Sinuhé Perea-Puente, Yanxue Wang, André Vellwock, David Martínez-Rubio" />
+    <script>
+      try {
+        var t = localStorage.getItem("cyp-theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body>
+    <header id="bar"></header>
+
+    <main class="wrap">
+      <section class="route" id="live">
+        <div id="live-card"></div>
+        <div class="head">
+          <h1 data-i18n="live.h1"></h1>
+          <p class="lead" data-i18n="live.lead"></p>
+        </div>
+        <p class="sim-banner" id="live-status"></p>
+        <div class="hourbar">
+          <span class="hourlab" data-i18n="live.hour"></span>
+          <div class="radioseg hours" id="live-hours" role="radiogroup"></div>
+          <button type="button" class="q hplay" id="live-play"></button>
+        </div>
+        <div class="filters" id="live-filters"></div>
+        <div id="live-panel"></div>
+        <details class="byparty-box" open>
+          <summary><span class="plus"></span><span data-i18n="hem.byparty"></span></summary>
+          <div class="byparty" id="live-parties"></div>
+        </details>
+        <details class="evo-box" open>
+          <summary><span class="plus"></span><span data-i18n="live.evo"></span></summary>
+          <div class="evo" id="live-evo"></div>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site">
+      <div class="wrap"><span id="authors"></span><span>MIT · CC BY 4.0</span></div>
+    </footer>
+
+    <script>
+      window.CYP_BASE = "../";
+    </script>
+    <script src="../assets/core.js"></script>
+    <script src="../data/elecciones/registro.js"></script>
+    <script src="../data/elecciones/2026-11-29.js"></script>
+    <script>
+      (() => {
+        const $ = (id) => document.getElementById(id);
+        const T = CYP.t;
+        Object.assign(CYP.I18N.es, {
+          "live.h1": "¿Siguen estas elecciones el patrón estadístico que deberían?",
+          "live.lead":
+            "Los datos de elecciones suelen seguir una ley numérica, y aquí te enseñamos en tiempo real si estas generales la cumplen. Con cada avance del recuento comprobamos si los votos de cada partido en cada provincia empiezan por 1, por 2… en la proporción esperada.",
+          "live.sim":
+            "Vista previa con datos simulados. Hasta la noche electoral, esta página muestra un ejemplo construido a partir de los resultados de 2023. Los datos reales aparecerán aquí cuando el Ministerio del Interior publique los primeros avances, a partir de las 20:00.",
+          "live.real": "Datos del Ministerio del Interior. Último avance: {h} ({p} escrutado).",
+          "live.hour": "Avance",
+          "live.counted": "escrutado",
+          "live.evo": "Evolución durante la noche",
+          "live.evo.note": "Cómo cambia el resultado de la selección actual con cada avance.",
+        });
+        Object.assign(CYP.I18N.en, {
+          "live.h1": "Is this election following the statistical pattern it should?",
+          "live.lead":
+            "Election data usually follow a number law, and here we show you in real time whether this general election does. With every update of the count we check whether the votes of each party in each province start with 1, 2… in the expected proportion.",
+          "live.sim":
+            "Preview with simulated data. Until election night, this page shows an example built from the 2023 results. Real data will appear here once the Ministry of the Interior publishes the first updates, from 20:00.",
+          "live.real": "Ministry of the Interior data. Latest update: {h} ({p} counted).",
+          "live.hour": "Update",
+          "live.counted": "counted",
+          "live.evo": "Through the night",
+          "live.evo.note": "How the result for the current selection changes with each update.",
+        });
+        const AUTHORS = [
+          ["Sinuhé Perea-Puente", "0000-0002-5869-5701"],
+          ["Yanxue Wang", "0009-0006-5523-5351"],
+          ["André Vellwock", "0000-0001-8296-2032"],
+          ["David Martínez-Rubio", "0000-0002-4345-5422"],
+        ];
+        const LIVE = window.CYP_LIVE || { updates: [], families: [] };
+        const entry = (window.CYP_REGISTRY || []).find((r) => r.id === "2026-11-29");
+        const st = {
+          hour: Math.max(0, LIVE.updates.length - 1),
+          camara: "congreso",
+          prov: "",
+          fam: Object.fromEntries([...LIVE.families.map((f) => f.id), "OTROS"].map((f) => [f, true])),
+        };
+        const rowsToRecords = (rows) => rows.map((r, i) => ({ v: r[5], row: i + 1, ctx: [r[2], r[3]].filter(Boolean).join(" · ") }));
+        const select = (rows, famOnly) =>
+          rows.filter(
+            (r) =>
+              r[0] === st.camara &&
+              (!st.prov || r[2].split(":")[0] === st.prov) &&
+              (famOnly ? r[4] === famOnly : (st.fam[r[4]] ?? st.fam.OTROS)),
+          );
+        const pct = (x) => CYP.fmt(100 * x, 0) + " %";
+        const panel = new CYP.Panel($("live-panel"));
+        CYP.route = "live";
+
+        function card() {
+          const cd = `<div class="countdown" aria-live="off">${["d", "h", "m", "s"].map((k) => `<div><b id="cd-${k}">—</b><span>${T("cd." + k)}</span></div>`).join("")}</div>`;
+          $("live-card").innerHTML = entry ? CYP.electionCard({ ...entry, page: null }, null, "", cd) : "";
+        }
+        const TARGET = Date.parse("2026-11-29T20:00:00+01:00");
+        function tick() {
+          const ms = TARGET - Date.now(),
+            pad = (x) => String(x).padStart(2, "0");
+          if (!$("cd-d")) return;
+          if (ms <= 0) {
+            ["cd-d", "cd-h", "cd-m", "cd-s"].forEach((id) => {
+              $(id).textContent = "0";
+            });
+            return;
+          }
+          const s = Math.floor(ms / 1000);
+          $("cd-d").textContent = Math.floor(s / 86400);
+          $("cd-h").textContent = pad(Math.floor((s % 86400) / 3600));
+          $("cd-m").textContent = pad(Math.floor((s % 3600) / 60));
+          $("cd-s").textContent = pad(s % 60);
+        }
+        function hours() {
+          $("live-hours").innerHTML = LIVE.updates
+            .map(
+              (u, i) =>
+                `<label><input type="radio" name="live-hour" value="${i}"${i === st.hour ? " checked" : ""}><span>${u.hora} · ${pct(u.escrutado)}</span></label>`,
+            )
+            .join("");
+          $("live-hours")
+            .querySelectorAll("input")
+            .forEach((n) =>
+              n.addEventListener("change", () => {
+                st.hour = +n.value;
+                update();
+              }),
+            );
+          const last = LIVE.updates[LIVE.updates.length - 1];
+          $("live-status").textContent = LIVE.simulated
+            ? T("live.sim")
+            : last
+              ? T("live.real", { h: last.hora, p: pct(last.escrutado) })
+              : "";
+          $("live-status").classList.toggle("real", !LIVE.simulated);
+        }
+        function filters() {
+          const rows = LIVE.updates[st.hour] ? LIVE.updates[st.hour].rows : [];
+          const provs = [...new Set(rows.map((r) => r[2].split(":")[0]))].sort((a, b) => a.localeCompare(b, "es"));
+          const rad = (id) =>
+            `<label><input type="radio" name="live-cam" data-cam="${id}"${st.camara === id ? " checked" : ""}><span>${T(id)}</span></label>`;
+          const chip = (id, label, sw) =>
+            `<label class="chip"><input type="checkbox" data-fam="${id}"${st.fam[id] ? " checked" : ""}><span class="sw" style="background:${sw}"></span>${label}</label>`;
+          $("live-filters").innerHTML =
+            `<div class="fg"><div class="radioseg" role="radiogroup" aria-label="${T("hem.camara")}">${rad("congreso")}${rad("senado")}</div>${CYP.q("q.camara")}</div>
+      <div class="fg">${LIVE.families.map((f) => chip(f.id, f.id, f.colour)).join("")}${chip("OTROS", T("OTROS"), "var(--muted)")}${CYP.q("q.family")}</div>
+      <div class="fg grow"><input type="search" list="live-provs" placeholder="${T("hem.prov")}" value="${CYP.esc(st.prov)}" aria-label="${T("hem.prov")}"><datalist id="live-provs">${provs.map((p) => `<option value="${CYP.esc(p)}">`).join("")}</datalist></div>`;
+          $("live-filters")
+            .querySelectorAll("[data-cam]")
+            .forEach((n) =>
+              n.addEventListener("change", () => {
+                st.camara = n.dataset.cam;
+                update();
+              }),
+            );
+          $("live-filters")
+            .querySelectorAll("[data-fam]")
+            .forEach((n) =>
+              n.addEventListener("change", () => {
+                st.fam[n.dataset.fam] = n.checked;
+                update();
+              }),
+            );
+          const ps = $("live-filters").querySelector("input[type=search]");
+          ps.addEventListener("change", () => {
+            st.prov = provs.includes(ps.value.trim()) ? ps.value.trim() : "";
+            if (!st.prov) ps.value = "";
+            update();
+          });
+        }
+        function label() {
+          const fams = Object.keys(st.fam).filter((k) => st.fam[k]);
+          const allF = fams.length === Object.keys(st.fam).length;
+          return [T(st.camara), allF ? null : fams.map((f) => (f === "OTROS" ? T("OTROS") : f)).join(", "), st.prov]
+            .filter(Boolean)
+            .join(" · ");
+        }
+        function parties(rows) {
+          $("live-parties").innerHTML = [...LIVE.families, { id: "OTROS", colour: CYP.cssVar("--muted") }]
+            .filter((f) => st.fam[f.id])
+            .map((f) => {
+              const res = CYP.analyse(rowsToRecords(select(rows, f.id)), {}),
+                t = res.tests.d1,
+                name = f.id === "OTROS" ? T("OTROS") : f.id;
+              const head = `<div class="ph"><b><span class="sw" style="background:${f.colour}"></span>${name}</b><small>n ${CYP.count(res.n)}</small></div>`;
+              return t
+                ? `<div class="pcard">${head}${CYP.sparkline(t, f.colour)}<div class="pf">${CYP.sema(t)}<span class="sv">${CYP.sigValue(t)}</span>${CYP.sigQ(t)}</div></div>`
+                : `<div class="pcard">${head}</div>`;
+            })
+            .join("");
+        }
+        function evolution() {
+          $("live-evo").innerHTML = `<p class="status">${T("live.evo.note")}</p><div class="evo-grid">${LIVE.updates
+            .map((u, i) => {
+              const t = CYP.analyse(rowsToRecords(select(u.rows)), {}).tests.d1;
+              return `<button type="button" class="evo-cell${i === st.hour ? " on" : ""}" data-h="${i}"><b>${u.hora}</b><small>${pct(u.escrutado)}</small>${t ? `<span class="lampdot ${CYP.lamp(t.conformity)}"></span><span class="sv">${CYP.sigValue(t)}</span>` : "—"}</button>`;
+            })
+            .join("")}</div>`;
+          $("live-evo")
+            .querySelectorAll("[data-h]")
+            .forEach((b) =>
+              b.addEventListener("click", () => {
+                st.hour = +b.dataset.h;
+                update();
+              }),
+            );
+        }
+        function update() {
+          const u = LIVE.updates[st.hour];
+          hours();
+          filters();
+          if (!u) {
+            panel.set({ kind: "numbers", records: [], name: "—" });
+            return;
+          }
+          panel.set({
+            kind: "numbers",
+            records: rowsToRecords(select(u.rows)),
+            name: label(),
+            kicker: `${T("live.hour")} ${u.hora} · ${pct(u.escrutado)} ${T("live.counted")}`,
+          });
+          parties(u.rows);
+          evolution();
+        }
+        let playing = 0;
+        function playBtn() {
+          const b = $("live-play");
+          b.textContent = playing ? "❚❚" : "▶";
+          b.title = T(playing ? "pause" : "play");
+          b.setAttribute("aria-label", b.title);
+        }
+        $("live-play").addEventListener("click", () => {
+          if (playing) {
+            clearInterval(playing);
+            playing = 0;
+            playBtn();
+            return;
+          }
+          st.hour = 0;
+          update();
+          playing = setInterval(() => {
+            if (st.hour >= LIVE.updates.length - 1) {
+              clearInterval(playing);
+              playing = 0;
+              playBtn();
+              return;
+            }
+            st.hour++;
+            update();
+          }, 1800);
+          playBtn();
+        });
+        function renderAll() {
+          CYP.applyI18n();
+          CYP.renderBar();
+          card();
+          tick();
+          update();
+          playBtn();
+          $("authors").innerHTML = AUTHORS.map(
+            ([n, o]) => `<a href="https://orcid.org/${o}" target="_blank" rel="noopener" title="ORCID ${o}">${n}</a>`,
+          ).join(" · ");
+        }
+        document.addEventListener("cyp:change", renderAll);
+        document.addEventListener("cyp:redraw", () => {
+          const u = LIVE.updates[st.hour];
+          if (u) {
+            parties(u.rows);
+            evolution();
+          }
+        });
+        renderAll();
+        setInterval(tick, 1000);
+      })();
+    </script>
+  </body>
+</html>

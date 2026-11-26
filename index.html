@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Cifras y Papeletas</title>
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <meta
+      name="description"
+      content="¿Siguen los votos en España la Ley de Benford? Elecciones generales desde 1977, casos célebres y análisis de tus propios datos."
+    />
+    <meta name="author" content="Sinuhé Perea-Puente, Yanxue Wang, André Vellwock, David Martínez-Rubio" />
+    <script>
+      try {
+        var t = localStorage.getItem("cyp-theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="stylesheet" href="assets/archive.css" />
+  </head>
+  <body>
+    <header id="bar"></header>
+
+    <main class="wrap">
+      <!-- INICIO -->
+      <section class="route" id="inicio" data-route="inicio">
+        <div id="home-next"></div>
+        <div class="head">
+          <h1 data-i18n="home.h1"></h1>
+          <p class="lead" data-i18n="home.lead"></p>
+        </div>
+        <p class="examples-intro" data-i18n="home.examples"></p>
+        <div id="home-panel"></div>
+      </section>
+
+      <!-- PRUÉBALO -->
+      <section class="route" id="pruebalo" data-route="pruebalo" hidden>
+        <div class="head">
+          <h1 data-i18n="try.h1"></h1>
+          <p class="lead" data-i18n="try.lead"></p>
+        </div>
+        <div class="search">
+          <label class="field" id="dropfield" for="file-input"
+            ><span class="fic" id="field-ic"></span><span id="field-text" data-i18n="try.drop"></span
+          ></label>
+          <input id="file-input" class="sr-only" type="file" accept=".xlsx,.xls,.ods,.csv,.tsv,.txt,.pdf,.docx,.json,image/*" />
+          <button class="btn go" id="btn-pick" type="button"></button>
+          <span id="up-q"></span>
+        </div>
+        <p class="status" id="status" role="status" hidden></p>
+        <details id="opts-box">
+          <summary><span class="plus"></span>⚙</summary>
+          <div class="opts">
+            <label class="opt"
+              ><span class="oq" data-q="q.opt.locale"></span><span class="ol" data-i18n="opt.locale"></span
+              ><select id="opt-locale">
+                <option value="auto">auto</option>
+                <option value="es">1.234,5</option>
+                <option value="en">1,234.5</option>
+              </select></label
+            >
+            <label class="opt"
+              ><span class="oq" data-q="q.opt.sign"></span><span class="ol" data-i18n="opt.sign"></span
+              ><select id="opt-sign">
+                <option value="positive">x &gt; 0</option>
+                <option value="both">|x|</option>
+                <option value="negative">x &lt; 0</option>
+              </select></label
+            >
+            <label class="opt"
+              ><span class="oq" data-q="q.opt.min"></span><span class="ol" data-i18n="opt.min"></span
+              ><input id="opt-min" type="number" min="0" step="any" value="0"
+            /></label>
+            <label class="opt"
+              ><span class="oq" data-q="q.opt.how"></span><span class="ol" data-i18n="opt.how"></span
+              ><input id="opt-how" type="number" min="1" max="10" step="1" value="2"
+            /></label>
+            <label class="opt"
+              ><span class="oq" data-q="q.opt.years"></span><span class="ol" data-i18n="opt.years"></span
+              ><span class="swbox"><input id="opt-years" class="switch" type="checkbox" role="switch" checked /></span
+            ></label>
+            <label class="opt"
+              ><span class="oq" data-q="q.opt.pct"></span><span class="ol" data-i18n="opt.pct"></span
+              ><span class="swbox"><input id="opt-pct" class="switch" type="checkbox" role="switch" checked /></span
+            ></label>
+          </div>
+          <div class="frow" id="cols" hidden style="margin-top: 12px"></div>
+        </details>
+        <div id="try-panel"></div>
+      </section>
+
+      <!-- HEMEROTECA -->
+      <section class="route" id="hemeroteca" data-route="hemeroteca" hidden>
+        <div class="head">
+          <h1 data-i18n="hem.h1"></h1>
+          <p class="lead" data-i18n="hem.lead"></p>
+        </div>
+        <div id="hem-picker" class="hem-picker"></div>
+        <p id="hem-scope" class="hem-scope"></p>
+        <div id="hem-rows"></div>
+        <div id="archive-root" hidden></div>
+      </section>
+
+      <!-- MÁS INFO -->
+      <section class="route" id="info" data-route="info" hidden>
+        <h1 data-i18n="info.h1"></h1>
+        <div class="article">
+          <nav class="toc" aria-label="índice">
+            <div data-es="es">
+              <a href="#m-intro-es">Introducción</a><a href="#m-origen-es">Origen</a><a href="#m-por-es">Por qué ocurre</a
+              ><a href="#m-dist-es">Distribuciones</a><a href="#m-medir-es">Cómo se mide</a><a href="#m-img-es">Otros usos</a
+              ><a href="#m-bib-es">Bibliografía</a>
+            </div>
+            <div data-es="en" hidden>
+              <a href="#m-intro-en">Introduction</a><a href="#m-origen-en">Origin</a><a href="#m-por-en">Why it happens</a
+              ><a href="#m-dist-en">Distributions</a><a href="#m-medir-en">How it is measured</a><a href="#m-img-en">Other uses</a
+              ><a href="#m-bib-en">Bibliography</a>
+            </div>
+          </nav>
+          <div class="prose" id="article">
+            <div data-es="es">
+              <div id="m-intro-es" class="anchor"></div>
+              <p>
+                Imagina una lista de números reales: poblaciones, facturas, longitudes de ríos o votos por provincia. Mira solo su primer
+                dígito. Cabría esperar que cada dígito, del 1 al 9, apareciera en una novena parte de los casos.
+              </p>
+              <p>
+                Pero no es así: mientras que el 1 aparece cerca del 30 % de las veces, el 9 lo hace en menos del 5 %. Esta regularidad se
+                denomina <b>Ley de Newcomb–Benford</b>.
+              </p>
+              <p>
+                Sin embargo, no es una regla obligatoria, sino una tendencia: se cumple en muchos casos, pero no en todos. Auditores,
+                estadísticos y periodistas la usan como un primer filtro para encontrar cifras que conviene revisar
+                <i class="cite">(Nigrini, 2012)</i>, también en elecciones, aunque con cautela
+                <i class="cite">(Pericchi y Torres, 2011; Deckert, Myagkov y Ordeshook, 2011; Mebane, 2011)</i>.
+              </p>
+
+              <h2 id="m-origen-es">Origen</h2>
+              <p>
+                En 1881 el astrónomo canadiense-estadounidense Simon Newcomb notó que las primeras páginas de las tablas de logaritmos,
+                libros que antes de las calculadoras servían para convertir productos en sumas, estaban más gastadas que las últimas.
+                Propuso que la probabilidad de que un número empiece por \(d\) es \(\log_{10}(1+1/d)\) <i class="cite">(Newcomb, 1881)</i>.
+                En 1938 el físico Frank Benford lo comprobó con más de 20 000 números de fuentes muy distintas. Theodore Hill dio la primera
+                explicación estadística general <i class="cite">(Hill, 1995)</i> y Mark Nigrini la llevó a la auditoría
+                <i class="cite">(Nigrini, 2012)</i>. Hoy se aplica también a datos epidemiológicos, científicos y electorales
+                <i class="cite">(Berger y Hill, 2015)</i>.
+              </p>
+
+              <h2 id="m-por-es">Por qué ocurre</h2>
+              <p>
+                Piensa en una cantidad que crece un tanto por ciento fijo cada año, como una población. Para pasar de 100 a 200 tiene que
+                duplicarse; para pasar de 900 a 1000 le basta con crecer un 11 %. Por eso pasa mucho más tiempo empezando por 1 que por 9.
+                Lo mismo ocurre con cualquier número que resulte de multiplicar muchos factores.
+              </p>
+              <p>
+                Fíjate además en la escala. Si existiera una ley universal sobre los primeros dígitos, debería funcionar igual en euros que
+                en dólares, en metros que en pies. El único reparto de primeras cifras que no cambia al cambiar de unidad es el de Benford.
+              </p>
+              <p class="adv">
+                Para lectores avanzados: si la mantisa \(\{\log_{10} x\}\), es decir, la parte decimal del logaritmo, se distribuye de forma
+                uniforme en \([0,1)\), los dígitos siguen exactamente la Ley de Benford. Hill demostró que la invariancia de escala, y
+                también la de base, implica esa distribución, y que la mezcla de muestras de distribuciones elegidas al azar tiende a
+                Benford <i class="cite">(Hill, 1995)</i>.
+              </p>
+
+              <h2 id="m-dist-es">Distribuciones</h2>
+              <p>La probabilidad de que el primer dígito sea \(d\) es</p>
+              <div class="eq">\[P(D_1=d)=\log_{10}\!\left(1+\frac{1}{d}\right),\qquad d=1,\dots,9.\]</div>
+              <div class="table-wrap">
+                <table>
+                  <tr>
+                    <th>\(d\)</th>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                    <td>7</td>
+                    <td>8</td>
+                    <td>9</td>
+                  </tr>
+                  <tr>
+                    <th>\(P\)</th>
+                    <td>30,1 %</td>
+                    <td>17,6 %</td>
+                    <td>12,5 %</td>
+                    <td>9,7 %</td>
+                    <td>7,9 %</td>
+                    <td>6,7 %</td>
+                    <td>5,8 %</td>
+                    <td>5,1 %</td>
+                    <td>4,6 %</td>
+                  </tr>
+                </table>
+              </div>
+              <p>
+                El segundo dígito puede ser 0, y su reparto es mucho más plano: va del 12 % para el 0 al 8,5 % para el 9. El tercero y el
+                cuarto son ya casi uniformes. En general, para la posición \(n\),
+              </p>
+              <div class="eq">\[P(D_n=d)=\sum_{k=10^{n-2}}^{10^{n-1}-1}\log_{10}\!\left(1+\frac{1}{10k+d}\right),\qquad n\ge 2.\]</div>
+              <figure>
+                <div class="chart digits-chart"></div>
+                <figcaption>Probabilidad de cada dígito en la primera, segunda, tercera y cuarta posición.</figcaption>
+              </figure>
+              <p>
+                Siendo un poco más imaginativos, podemos tomar los dos primeros dígitos juntos, de 10 a 99: siguen
+                \(P(D_1D_2=m)=\log_{10}(1+1/m)\). Esta prueba es más fina y detecta importes repetidos. El último dígito de un recuento
+                grande, en cambio, no sigue Benford: debería ser uniforme, un 10 % para cada dígito. Quien inventa cifras suele repetir unos
+                dígitos y evitar otros, y eso se nota <i class="cite">(Beber y Scacco, 2012)</i>.
+              </p>
+              <p>
+                Estas distribuciones se cumplen bien cuando las cifras abarcan varios órdenes de magnitud (por ejemplo, de 10 a 100 000), no
+                tienen un tope ni un mínimo impuesto y no son números asignados, como teléfonos o códigos postales. No se cumplen con
+                alturas de personas, con precios redondeados a propósito ni con cifras que tienen un máximo: los votos de una mesa
+                electoral, por ejemplo, no pueden superar el número de electores de esa mesa. Por eso una desviación en votos por mesa puede
+                ser completamente normal.
+              </p>
+
+              <h2 id="m-medir-es">Cómo se mide la desviación</h2>
+              <p>
+                El parámetro estándar para cuantificar la desviación es la <u>MAD (desviación absoluta media)</u>: la distancia media entre
+                el porcentaje observado y el que predice Benford, dígito a dígito,
+              </p>
+              <div class="eq">\[\mathrm{MAD}=\frac{1}{K}\sum_{d}\left|\hat p_d-p_d\right|.\]</div>
+              <p>
+                Nigrini propuso estos umbrales, que también usa el paquete R <i>benford.analysis</i>
+                <i class="cite">(Nigrini, 2012; Cinelli, 2014)</i>:
+              </p>
+              <div class="table-wrap">
+                <table>
+                  <tr>
+                    <th></th>
+                    <th>✓✓ muy cerca</th>
+                    <th>✓ cerca</th>
+                    <th><i class="warn"></i> dudoso</th>
+                    <th>✗ no se ajusta</th>
+                  </tr>
+                  <tr>
+                    <td>Primer dígito</td>
+                    <td>≤ 0,006</td>
+                    <td>≤ 0,012</td>
+                    <td>≤ 0,015</td>
+                    <td>&gt; 0,015</td>
+                  </tr>
+                  <tr>
+                    <td>Segundo dígito</td>
+                    <td>≤ 0,008</td>
+                    <td>≤ 0,010</td>
+                    <td>≤ 0,011</td>
+                    <td>&gt; 0,011</td>
+                  </tr>
+                  <tr>
+                    <td>Dos primeros</td>
+                    <td>≤ 0,0012</td>
+                    <td>≤ 0,0018</td>
+                    <td>≤ 0,0022</td>
+                    <td>&gt; 0,0022</td>
+                  </tr>
+                </table>
+              </div>
+              <p class="adv">
+                Los umbrales suponen muestras grandes. Con pocas cifras la MAD crece por puro azar. Si se cumpliera Benford, su valor
+                esperado sería \(\mathrm{E}[\mathrm{MAD}]\approx\frac1K\sum_d\sqrt{2p_d(1-p_d)/(\pi n)}\).
+              </p>
+              <p>
+                La prueba clásica es la de <b>ji cuadrado</b>, \(\chi^2=\sum_d (O_d-np_d)^2/(np_d)\), que compara los recuentos observados
+                \(O_d\) con los esperados \(np_d\). De ella sale el <b><u>p-valor</u></b
+                >: la probabilidad de ver al menos una desviación así si los datos siguieran Benford. Como los p-valores son difíciles de
+                interpretar, este sitio muestra por defecto el <b><u>s-valor</u></b
+                >, \(S=-\log_2 p\) <i class="cite">(Greenland, 2019)</i>: un resultado con \(S=10\) es tan sorprendente como sacar 10 caras
+                seguidas al lanzar una moneda. Hasta 4 o 5 caras no es nada raro; varias decenas indican una desviación clara. El botón
+                <b>p / s</b> de la parte superior cambia entre ambos.
+              </p>
+              <p class="adv">
+                Con muchos datos, cualquier diferencia mínima da un s-valor enorme: mira simultáneamente el s-valor (¿es real?) y la MAD
+                (¿es grande?).
+              </p>
+              <p>
+                La <b><u>distancia d*</u></b
+                >, \(d^{*}=\sqrt{\sum_d(\hat p_d-p_d)^2}\,/\,1{,}03631\) para el primer dígito, es la distancia euclídea a Benford
+                normalizada entre 0 y 1 <i class="cite">(Wei y Vellwock, 2020)</i>; por encima de 0,25 conviene cautela
+                <i class="cite">(Goodman, 2016)</i>. Cada dígito muestra además un <b><u>intervalo de confianza</u></b> de 1σ, 2σ o 3σ (el
+                68,3 %, 95,4 % o 99,7 % de las muestras si se cumpliera Benford); las barras rojas, «anómalas», quedan fuera. Las
+                <b><u>cifras sospechosas</u></b> listan los grupos de dos primeros dígitos que más se apartan, como <i>getSuspects</i>
+                <i class="cite">(Cinelli, 2014)</i>, y las <b><u>cifras repetidas</u></b> muestran si un mismo importe explica un pico.
+              </p>
+              <p class="adv">
+                El estadístico por dígito es \(z_d=\left(|\hat p_d-p_d|-\tfrac{1}{2n}\right)\big/\sqrt{p_d(1-p_d)/n}\), con corrección de
+                continuidad <i class="cite">(Nigrini, 2012)</i>; el intervalo es \(p_d\pm\left(k\sqrt{p_d(1-p_d)/n}+\tfrac{1}{2n}\right)\)
+                con \(k=1,2,3\). Los dígitos se toman con la precisión del propio conjunto: si casi todas las cifras tienen céntimos, 50,00
+                cuenta como 5000. Un dígito en la posición \(n\) solo se usa si la cifra tiene al menos \(n\) dígitos. Los ceros se
+                excluyen.
+              </p>
+
+              <h2 id="m-img-es">Otros usos</h2>
+              <p>
+                Hasta ahora habíamos hablado únicamente de tablas y cifras numéricas, pero ¿no es acaso una <u>imagen</u> una gran tabla de
+                valores? Una fotografía digital se guarda como una suma de patrones de frecuencia en bloques de 8×8 píxeles (la transformada
+                discreta del coseno, base del formato JPEG). Los primeros dígitos de esos coeficientes siguen una forma generalizada de la
+                Ley de Benford <i class="cite">(Fu, Shi y Su, 2007)</i>:
+              </p>
+              <div class="eq">\[p(d)=N\log_{10}\!\left(1+\frac{1}{s+d^{\,q}}\right).\]</div>
+              <p>
+                Una foto recomprimida, retocada o generada por ordenador puede alterar ese patrón. El mapa de la imagen colorea cada zona
+                según lo que se aparta. Un cielo liso o un texto también se apartan, así que es una pista, no una prueba.
+              </p>
+
+              <h2 id="m-bib-es">Bibliografía</h2>
+            </div>
+
+            <div data-es="en" hidden>
+              <div id="m-intro-en" class="anchor"></div>
+              <p>
+                Imagine a list of real numbers: populations, invoices, river lengths or votes per province. Look only at their first digit.
+                One would expect each digit, from 1 to 9, to appear in one ninth of the cases.
+              </p>
+              <p>
+                But it does not: while 1 appears in about 30% of cases, 9 appears in less than 5%. This regularity is called the
+                <b>Newcomb–Benford Law</b>.
+              </p>
+              <p>
+                However, it is not a strict rule but a tendency: it holds in many cases, but not in all. Auditors, statisticians and
+                journalists use it as a first filter to find figures worth checking <i class="cite">(Nigrini, 2012)</i>, also in elections,
+                although with caution <i class="cite">(Pericchi and Torres, 2011; Deckert, Myagkov and Ordeshook, 2011; Mebane, 2011)</i>.
+              </p>
+
+              <h2 id="m-origen-en">Origin</h2>
+              <p>
+                In 1881 the Canadian-American astronomer Simon Newcomb noticed that the first pages of logarithm tables, books used before
+                calculators to turn products into sums, were more worn than the last ones. He proposed that the probability of a number
+                starting with \(d\) is \(\log_{10}(1+1/d)\) <i class="cite">(Newcomb, 1881)</i>. In 1938 the physicist Frank Benford tested
+                it on more than 20,000 numbers from very different sources. Theodore Hill gave the first general statistical explanation
+                <i class="cite">(Hill, 1995)</i> and Mark Nigrini brought it to auditing <i class="cite">(Nigrini, 2012)</i>. Today it is
+                also applied to epidemiological, scientific and electoral data <i class="cite">(Berger and Hill, 2015)</i>.
+              </p>
+
+              <h2 id="m-por-en">Why it happens</h2>
+              <p>
+                Think of a quantity that grows by a fixed percentage each year, like a population. To go from 100 to 200 it must double; to
+                go from 900 to 1000 it only needs to grow by 11%. So it spends much longer starting with 1 than with 9. The same happens
+                with any number that results from multiplying many factors.
+              </p>
+              <p>
+                Notice also the scale. If there were a universal law about first digits, it should work equally in euros and dollars, in
+                metres and feet. The only spread of first digits that does not change when the unit changes is Benford's.
+              </p>
+              <p class="adv">
+                For advanced readers: if the mantissa \(\{\log_{10} x\}\), the fractional part of the logarithm, is uniformly distributed on
+                \([0,1)\), the digits follow Benford's Law exactly. Hill proved that scale invariance, and also base invariance, implies
+                this distribution, and that mixing samples from randomly chosen distributions tends to Benford
+                <i class="cite">(Hill, 1995)</i>.
+              </p>
+
+              <h2 id="m-dist-en">Distributions</h2>
+              <p>The probability that the first digit is \(d\) is</p>
+              <div class="eq">\[P(D_1=d)=\log_{10}\!\left(1+\frac{1}{d}\right),\qquad d=1,\dots,9.\]</div>
+              <div class="table-wrap">
+                <table>
+                  <tr>
+                    <th>\(d\)</th>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                    <td>7</td>
+                    <td>8</td>
+                    <td>9</td>
+                  </tr>
+                  <tr>
+                    <th>\(P\)</th>
+                    <td>30.1%</td>
+                    <td>17.6%</td>
+                    <td>12.5%</td>
+                    <td>9.7%</td>
+                    <td>7.9%</td>
+                    <td>6.7%</td>
+                    <td>5.8%</td>
+                    <td>5.1%</td>
+                    <td>4.6%</td>
+                  </tr>
+                </table>
+              </div>
+              <p>
+                The second digit can be 0, and its distribution is much flatter: from 12% for 0 to 8.5% for 9. The third and fourth digits
+                are already almost uniform. In general, for position \(n\),
+              </p>
+              <div class="eq">\[P(D_n=d)=\sum_{k=10^{n-2}}^{10^{n-1}-1}\log_{10}\!\left(1+\frac{1}{10k+d}\right),\qquad n\ge 2.\]</div>
+              <figure>
+                <div class="chart digits-chart"></div>
+                <figcaption>Probability of each digit in the first, second, third and fourth position.</figcaption>
+              </figure>
+              <p>
+                Being a little more imaginative, we can take the first two digits together, from 10 to 99: they follow
+                \(P(D_1D_2=m)=\log_{10}(1+1/m)\). This finer test detects repeated amounts. The last digit of a large count, by contrast,
+                does not follow Benford: it should be uniform, 10% for each digit. People who invent figures tend to repeat some digits and
+                avoid others, and that shows <i class="cite">(Beber and Scacco, 2012)</i>.
+              </p>
+              <p>
+                These distributions hold well when the figures span several orders of magnitude (for example, from 10 to 100,000), have no
+                imposed cap or floor, and are not assigned numbers such as phone numbers or postcodes. They do not hold for people's
+                heights, deliberately rounded prices or capped figures: votes at a polling station, for example, cannot exceed the number of
+                voters registered there. So a deviation in votes per station can be perfectly normal.
+              </p>
+
+              <h2 id="m-medir-en">How the deviation is measured</h2>
+              <p>
+                The standard parameter to quantify the deviation is the <u>MAD (mean absolute deviation)</u>: the average distance between
+                the observed share and Benford's, digit by digit,
+              </p>
+              <div class="eq">\[\mathrm{MAD}=\frac{1}{K}\sum_{d}\left|\hat p_d-p_d\right|.\]</div>
+              <p>
+                Nigrini proposed these thresholds, also used by the R package <i>benford.analysis</i>
+                <i class="cite">(Nigrini, 2012; Cinelli, 2014)</i>:
+              </p>
+              <div class="table-wrap">
+                <table>
+                  <tr>
+                    <th></th>
+                    <th>✓✓ very close</th>
+                    <th>✓ close</th>
+                    <th><i class="warn"></i> doubtful</th>
+                    <th>✗ does not fit</th>
+                  </tr>
+                  <tr>
+                    <td>First digit</td>
+                    <td>≤ 0.006</td>
+                    <td>≤ 0.012</td>
+                    <td>≤ 0.015</td>
+                    <td>&gt; 0.015</td>
+                  </tr>
+                  <tr>
+                    <td>Second digit</td>
+                    <td>≤ 0.008</td>
+                    <td>≤ 0.010</td>
+                    <td>≤ 0.011</td>
+                    <td>&gt; 0.011</td>
+                  </tr>
+                  <tr>
+                    <td>First two</td>
+                    <td>≤ 0.0012</td>
+                    <td>≤ 0.0018</td>
+                    <td>≤ 0.0022</td>
+                    <td>&gt; 0.0022</td>
+                  </tr>
+                </table>
+              </div>
+              <p class="adv">
+                The thresholds assume large samples. With few figures the MAD grows by chance alone. If Benford held, its expected value
+                would be \(\mathrm{E}[\mathrm{MAD}]\approx\frac1K\sum_d\sqrt{2p_d(1-p_d)/(\pi n)}\).
+              </p>
+              <p>
+                The classical test is the <b>chi-squared</b> test, \(\chi^2=\sum_d (O_d-np_d)^2/(np_d)\), which compares observed counts
+                \(O_d\) with expected ones \(np_d\). It yields the <b><u>p-value</u></b
+                >: the probability of seeing at least a deviation this large if the data followed Benford. As p-values are hard to read,
+                this site shows the <b><u>s-value</u></b> by default, \(S=-\log_2 p\) <i class="cite">(Greenland, 2019)</i>: a result with
+                \(S=10\) is as surprising as tossing 10 heads in a row with a coin. Up to 4 or 5 heads is nothing odd; several tens indicate
+                a clear deviation. The <b>p / s</b> button at the top switches between the two.
+              </p>
+              <p class="adv">
+                With many data, any tiny difference gives a huge s-value: look at the s-value (is it real?) and the MAD (is it large?)
+                together.
+              </p>
+              <p>
+                The <b><u>distance d*</u></b
+                >, \(d^{*}=\sqrt{\sum_d(\hat p_d-p_d)^2}\,/\,1.03631\) for the first digit, is the Euclidean distance to Benford scaled
+                between 0 and 1 <i class="cite">(Wei and Vellwock, 2020)</i>; values above 0.25 deserve caution
+                <i class="cite">(Goodman, 2016)</i>. Each digit also shows a <b><u>confidence interval</u></b> of 1σ, 2σ or 3σ (68.3%, 95.4%
+                or 99.7% of samples if Benford held); red, "anomalous" bars fall outside. <b><u>Suspect figures</u></b> list the
+                first-two-digit groups that deviate most, as <i>getSuspects</i> does <i class="cite">(Cinelli, 2014)</i>, and
+                <b><u>repeated figures</u></b> show whether a single amount explains a spike.
+              </p>
+              <p class="adv">
+                The per-digit statistic is \(z_d=\left(|\hat p_d-p_d|-\tfrac{1}{2n}\right)\big/\sqrt{p_d(1-p_d)/n}\), with continuity
+                correction <i class="cite">(Nigrini, 2012)</i>; the interval is \(p_d\pm\left(k\sqrt{p_d(1-p_d)/n}+\tfrac{1}{2n}\right)\)
+                with \(k=1,2,3\). Digits are taken at the dataset's own precision: if almost all figures carry cents, 50.00 counts as 5000.
+                A digit at position \(n\) is only used when the figure has at least \(n\) digits. Zeros are excluded.
+              </p>
+
+              <h2 id="m-img-en">Other uses</h2>
+              <p>
+                So far we have only talked about tables and numerical figures, but is an <u>image</u> not just a large table of values? A
+                digital photo is stored as a sum of frequency patterns in 8×8 pixel blocks (the discrete cosine transform behind JPEG). The
+                first digits of those coefficients follow a generalised form of Benford's Law <i class="cite">(Fu, Shi and Su, 2007)</i>:
+              </p>
+              <div class="eq">\[p(d)=N\log_{10}\!\left(1+\frac{1}{s+d^{\,q}}\right).\]</div>
+              <p>
+                A recompressed, edited or computer-generated photo can change that pattern. The image map colours each area by how far it
+                departs. Flat sky or text also departs, so it is a clue, not proof.
+              </p>
+
+              <h2 id="m-bib-en">Bibliography</h2>
+            </div>
+            <ul class="refs" id="refs"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site">
+      <div class="wrap"><span id="authors"></span><span>MIT · CC BY 4.0</span></div>
+    </footer>
+
+    <script src="assets/core.js"></script>
+    <script src="data/ejemplos.js"></script>
+    <script src="data/elecciones/registro.js"></script>
+    <script src="data/elecciones/2023-07-23.js"></script>
+    <script src="data/archivo/manifest.js"></script>
+    <script src="assets/archive.js"></script>
+    <script src="assets/archive-bridge.js"></script>
+    <script>
+      (() => {
+        const $ = (id) => document.getElementById(id);
+        const T = CYP.t;
+        const AUTHORS = [
+          ["Sinuhé Perea-Puente", "0000-0002-5869-5701"],
+          ["Yanxue Wang", "0009-0006-5523-5351"],
+          ["André Vellwock", "0000-0001-8296-2032"],
+          ["David Martínez-Rubio", "0000-0002-4345-5422"],
+        ];
+        const REFS = [
+          {
+            k: "book",
+            a: "Berger, A. y Hill, T. P.",
+            y: 2015,
+            ti: "An Introduction to Benford's Law",
+            src: "Princeton University Press.",
+            doi: "10.23943/princeton/9780691163062.001.0001",
+          },
+          {
+            k: "book",
+            a: "Nigrini, M. J.",
+            y: 2012,
+            ti: "Benford's Law: Applications for Forensic Accounting, Auditing, and Fraud Detection",
+            src: "Wiley.",
+            doi: "10.1002/9781119203094",
+          },
+          {
+            k: "art",
+            a: "Beber, B. y Scacco, A.",
+            y: 2012,
+            ti: "What the numbers say: A digit-based test for election fraud",
+            src: "Political Analysis, 20(2), 211–234.",
+            doi: "10.1093/pan/mps003",
+          },
+          {
+            k: "art",
+            a: "Benford, F.",
+            y: 1938,
+            ti: "The law of anomalous numbers",
+            src: "Proceedings of the American Philosophical Society, 78(4), 551–572.",
+            url: "https://www.jstor.org/stable/984802",
+            label: "JSTOR 984802",
+          },
+          {
+            k: "web",
+            a: "Cinelli, C.",
+            y: 2014,
+            ti: "benford.analysis: Benford Analysis for Data Validation and Forensic Analytics",
+            src: "Paquete R, CRAN.",
+            doi: "10.32614/CRAN.package.benford.analysis",
+          },
+          {
+            k: "art",
+            a: "Deckert, J., Myagkov, M. y Ordeshook, P. C.",
+            y: 2011,
+            ti: "Benford's Law and the detection of election fraud",
+            src: "Political Analysis, 19(3), 245–268.",
+            doi: "10.1093/pan/mpr014",
+          },
+          {
+            k: "art",
+            a: "Fu, D., Shi, Y. Q. y Su, W.",
+            y: 2007,
+            ti: "A generalized Benford's law for JPEG coefficients and its applications in image forensics",
+            src: "Proc. SPIE 6505.",
+            doi: "10.1117/12.704723",
+          },
+          {
+            k: "art",
+            a: "Goodman, W.",
+            y: 2016,
+            ti: "The promises and pitfalls of Benford's law",
+            src: "Significance, 13(3), 38–41.",
+            doi: "10.1111/j.1740-9713.2016.00919.x",
+          },
+          {
+            k: "art",
+            a: "Greenland, S.",
+            y: 2019,
+            ti: "Valid P-values behave exactly as they should",
+            src: "The American Statistician, 73(sup1), 106–114.",
+            doi: "10.1080/00031305.2018.1529625",
+          },
+          {
+            k: "art",
+            a: "Hill, T. P.",
+            y: 1995,
+            ti: "A statistical derivation of the significant-digit law",
+            src: "Statistical Science, 10(4), 354–363.",
+            doi: "10.1214/ss/1177009869",
+          },
+          {
+            k: "art",
+            a: "Mebane, W. R., Jr.",
+            y: 2011,
+            ti: "Comment on “Benford's Law and the detection of election fraud”",
+            src: "Political Analysis, 19(3), 269–272.",
+            doi: "10.1093/pan/mpr024",
+          },
+          {
+            k: "art",
+            a: "Newcomb, S.",
+            y: 1881,
+            ti: "Note on the frequency of use of the different digits in natural numbers",
+            src: "American Journal of Mathematics, 4(1), 39–40.",
+            doi: "10.2307/2369148",
+          },
+          {
+            k: "art",
+            a: "Pericchi, L. y Torres, D.",
+            y: 2011,
+            ti: "Quick anomaly detection by the Newcomb–Benford law, with applications to electoral processes data from the USA, Puerto Rico and Venezuela",
+            src: "Statistical Science, 26(4), 502–516.",
+            doi: "10.1214/09-STS296",
+          },
+          {
+            k: "art",
+            a: "Wei, A. y Vellwock, A. E.",
+            y: 2020,
+            ti: "Is COVID-19 data reliable? A statistical analysis with Benford's Law",
+            src: "Preprint, v2.",
+          },
+        ];
+        const RICON = { book: CYP.ICON.book, art: CYP.ICON.pen, web: CYP.ICON.globe };
+        const link = (r) =>
+          r.doi
+            ? `<a class="doi" href="https://doi.org/${r.doi}" target="_blank" rel="noopener">doi:${r.doi}</a>`
+            : r.url
+              ? `<a class="doi" href="${r.url}" target="_blank" rel="noopener">${r.label}</a>`
+              : "";
+        const en = () => CYP.lang === "en";
+        const confWord = (t) => `${CYP.CONFSYM[t.conformity] || ""} ${T("conf." + t.conformity)}`;
+        const story = (title, data, what, result) => (res) => {
+          const t = res.tests.d1;
+          return `<h2>${title}</h2><p><b>${en() ? "The data." : "Los datos."}</b> ${data}</p>
+      <p><b>${en() ? "What you see." : "Qué ves."}</b> ${what || (en() ? "Each bar shows what share of the numbers starts with 1, 2… up to 9. The dashed line is what Benford's Law predicts; red bars fall outside the range expected by chance." : "Cada barra indica qué parte de los números empieza por 1, por 2… hasta 9. La línea discontinua es lo que predice la Ley de Benford; las barras rojas se salen del margen que cabría esperar por azar.")}</p>
+      <p><b>${en() ? "What happens." : "Qué pasa."}</b> ${result(res, t)}</p>`;
+        };
+        const EXAMPLES = [
+          {
+            key: "corporate",
+            name: { es: "Pagos de una empresa de servicios, 2010", en: "Utility company payments, 2010" },
+            sign: "both",
+            story: (r) =>
+              story(
+                en() ? "Payments by a utility company, 2010" : "Pagos de una empresa de servicios, 2010",
+                en()
+                  ? `${CYP.int(r.n)} payments made in 2010 by a US electricity company to its suppliers. It is the teaching example of the auditor Mark Nigrini <i>(Nigrini, 2012)</i>.`
+                  : `${CYP.int(r.n)} pagos que una empresa eléctrica de Estados Unidos hizo a sus proveedores en 2010. Es el ejemplo didáctico del auditor Mark Nigrini <i>(Nigrini, 2012)</i>.`,
+                null,
+                (res, t) => {
+                  const d = res.dups[0];
+                  return en()
+                    ? `The overall shape looks like the law, but almost every bar falls outside the range (traffic light: ${confWord(t)}). With so many payments, even small differences stand out. The ×2 tab gives the clue: the amount ${CYP.fmt(d.value, res.decimals)} appears ${CYP.int(d.count)} times. An auditor would check those repeated payments first. This does not prove fraud; it shows where to look.`
+                    : `La forma general se parece a la de la ley, pero casi todas las barras se salen del margen (semáforo: ${confWord(t)}). Con tantos pagos, hasta las diferencias pequeñas destacan. La pestaña ×2 da la pista: el importe ${CYP.fmt(d.value, res.decimals)} aparece ${CYP.int(d.count)} veces. Un auditor revisaría primero esos pagos repetidos. Esto no demuestra fraude: indica dónde mirar.`;
+                },
+              )(r),
+            records: () => {
+              const v = CYP_EXAMPLES.corporate.values.split(","),
+                ven = CYP_EXAMPLES.corporate.vendor.split(",");
+              return v.map((x, i) => ({ v: +x, row: i + 1, ctx: "#" + ven[i] }));
+            },
+          },
+          {
+            key: "census",
+            name: { es: "Población de municipios de EE. UU., 2009", en: "US town populations, 2009" },
+            sign: "positive",
+            story: (r) =>
+              story(
+                en() ? "US town populations, 2009" : "Población de municipios de EE. UU., 2009",
+                en()
+                  ? `The population of ${CYP.int(r.n)} cities and towns in the United States in 2009.`
+                  : `La población de ${CYP.int(r.n)} ciudades y pueblos de Estados Unidos en 2009.`,
+                null,
+                (res, t) =>
+                  en()
+                    ? `The bars follow the line almost perfectly (traffic light: ${confWord(t)}). This is the textbook case: populations grow little by little over many years, and they range from a few dozen people to millions. Those are exactly the conditions under which the law holds.`
+                    : `Las barras siguen la línea casi a la perfección (semáforo: ${confWord(t)}). Es el caso de libro: las poblaciones crecen poco a poco durante muchos años y van desde unas decenas de habitantes hasta millones. Son justo las condiciones en las que se cumple la ley.`,
+              )(r),
+            records: () => {
+              const v = CYP_EXAMPLES.census.values.split(","),
+                lab = CYP_EXAMPLES.census.label.split("|");
+              return v.map((x, i) => ({ v: +x, row: i + 1, ctx: lab[i] }));
+            },
+          },
+          {
+            key: "sino",
+            name: { es: "Sino-Forest Corporation, 2010", en: "Sino-Forest Corporation, 2010" },
+            sign: "positive",
+            story: (r) =>
+              story(
+                "Sino-Forest Corporation, 2010",
+                en()
+                  ? `${CYP.int(r.n)} figures from the 2010 accounts of Sino-Forest, a Canadian company listed on the Toronto Stock Exchange that claimed to run large forest plantations in China. At the end of 2010 it was worth about 5 billion dollars. In June 2011 a report accused it of inflating its assets and earnings; its shares fell by 82% and in August trading was suspended. In March 2012 it filed for bankruptcy protection, and in 2017 the Ontario securities regulator found that the company and four of its executives had committed fraud.`
+                  : `${CYP.int(r.n)} cifras de las cuentas de 2010 de Sino-Forest, una empresa canadiense que cotizaba en la Bolsa de Toronto y decía gestionar grandes plantaciones forestales en China. A finales de 2010 valía unos 5000 millones de dólares. En junio de 2011 un informe la acusó de inflar sus activos y sus beneficios: sus acciones cayeron un 82 % y en agosto se suspendió su cotización. En marzo de 2012 se acogió a la protección por quiebra, y en 2017 el regulador de valores de Ontario concluyó que la empresa y cuatro de sus directivos habían cometido fraude.`,
+                null,
+                (res, t) =>
+                  en()
+                    ? `The first digit fits reasonably well (traffic light: ${confWord(t)}), so the law would not have raised the alarm. The last digit (⋯d tab) does deviate strongly, mostly because of the rounded figures that are common in accounts. The lesson: following the law does not prove that accounts are clean, and not following it does not prove fraud.`
+                    : `La primera cifra se ajusta razonablemente (semáforo: ${confWord(t)}), así que la ley no habría dado la alarma. La última cifra (pestaña ⋯d) sí se aparta mucho, sobre todo por las cifras redondeadas que abundan en unas cuentas. La lección: cumplir la ley no demuestra que unas cuentas estén limpias, y no cumplirla tampoco demuestra fraude.`,
+              )(r),
+            records: () => CYP_EXAMPLES.sino.values.split(",").map((x, i) => ({ v: +x, row: i + 1, ctx: "" })),
+          },
+          {
+            key: "c23",
+            name: { es: "Congreso, 23J 2023", en: "Congress, 23J 2023" },
+            sign: "positive",
+            story: (r) =>
+              story(
+                en() ? "Congress, 23 July 2023" : "Congreso, 23 de julio de 2023",
+                en()
+                  ? `The votes of each party in each province in the election to the Congress of Deputies of 23 July 2023, as published in the Official State Gazette (BOE). There are ${CYP.int(r.n)} numbers.`
+                  : `Los votos de cada candidatura en cada provincia en las elecciones al Congreso del 23 de julio de 2023, tal como los publicó el BOE. Son ${CYP.int(r.n)} números.`,
+                null,
+                (res, t) =>
+                  en()
+                    ? `The bars fit well (traffic light: ${confWord(t)}) and the s-value is small: nothing looks odd. But note that with a few hundred numbers the test can only detect large deviations. Results by polling station would allow a finer analysis.`
+                    : `Las barras se ajustan bien (semáforo: ${confWord(t)}) y el s-valor es pequeño: no hay nada raro. Pero ojo: con unos cientos de números, la prueba solo detectaría desviaciones grandes. Los resultados por mesa permitirían un análisis más fino.`,
+              )(r),
+            records: () => rowsToRecords(CYP.electionData("2023-07-23").rows.filter((r) => r[0] === "congreso" && r[1] === "ES")),
+          },
+        ];
+        const rowsToRecords = (rows) => rows.map((r, i) => ({ v: r[5], row: i + 1, ctx: [r[2], r[3], r[6]].filter(Boolean).join(" · ") }));
+        const REG = (window.CYP_REGISTRY || []).slice().sort((a, b) => b.id.localeCompare(a.id));
+
+        /* ---------- routing */
+        const ROUTES = ["inicio", "pruebalo", "hemeroteca", "info"],
+          ALIAS = { compruebalo: "pruebalo", metodo: "info" };
+        let mathDone = false;
+        function route() {
+          let h = location.hash.slice(1);
+          if (ALIAS[h]) {
+            h = ALIAS[h];
+            history.replaceState(null, "", "#" + h);
+          }
+          const r = ROUTES.includes(h) ? h : h.startsWith("m-") ? "info" : "inicio";
+          CYP.route = r;
+          document.querySelectorAll("section.route").forEach((s) => {
+            s.hidden = s.dataset.route !== r;
+          });
+          CYP.renderBar();
+          if (r === "hemeroteca") renderHemeroteca();
+          if (r === "info") {
+            renderDigits();
+            if (!mathDone) {
+              mathDone = true;
+              CYP.math($("article"));
+            }
+            spy();
+          }
+          if (ROUTES.includes(h)) window.scrollTo(0, 0);
+          schedule();
+        }
+        addEventListener("hashchange", route);
+
+        /* ---------- inicio */
+        let exI = 0,
+          hold = false,
+          paused = false,
+          timer = 0;
+        const move = (d) => {
+          exI = (exI + d + EXAMPLES.length) % EXAMPLES.length;
+          showExample();
+          schedule();
+        };
+        function schedule() {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            if (!hold && !paused && !document.hidden && CYP.route === "inicio") move(1);
+            else schedule();
+          }, 10000);
+        }
+        const homePanel = new CYP.Panel($("home-panel"), {
+          carousel: {
+            count: () => EXAMPLES.length,
+            index: () => exI,
+            move,
+            paused: () => paused,
+            toggle: () => {
+              paused = !paused;
+              schedule();
+            },
+          },
+        });
+        const hp = $("home-panel");
+        hp.addEventListener("mouseenter", () => {
+          hold = true;
+        });
+        hp.addEventListener("mouseleave", () => {
+          hold = false;
+          schedule();
+        });
+        hp.addEventListener("focusin", () => {
+          hold = true;
+        });
+        hp.addEventListener("focusout", () => {
+          hold = false;
+        });
+        function showExample() {
+          const E = EXAMPLES[exI];
+          homePanel.set({ kind: "numbers", records: E.records(), opts: { sign: E.sign }, name: E.name, story: E.story });
+        }
+        function renderNext() {
+          const e = REG.find((r) => r.id === "2026-11-29");
+          const cd = `<div class="countdown" aria-live="off">${["d", "h", "m", "s"].map((k) => `<div><b id="cd-${k}">—</b><span>${T("cd." + k)}</span></div>`).join("")}</div>`;
+          $("home-next").innerHTML = e ? CYP.electionCard(e, null, "", cd) : "";
+        }
+        const TARGET = Date.parse("2026-11-29T20:00:00+01:00");
+        function tick() {
+          const ms = TARGET - Date.now(),
+            pad = (x) => String(x).padStart(2, "0");
+          if (ms <= 0) {
+            ["cd-d", "cd-h", "cd-m", "cd-s"].forEach((id) => {
+              $(id).textContent = "0";
+            });
+            return;
+          }
+          const s = Math.floor(ms / 1000);
+          $("cd-d").textContent = Math.floor(s / 86400);
+          $("cd-h").textContent = pad(Math.floor((s % 86400) / 3600));
+          $("cd-m").textContent = pad(Math.floor((s % 3600) / 60));
+          $("cd-s").textContent = pad(s % 60);
+        }
+
+        /* ---------- hemeroteca */
+
+        let selectedElection = new URLSearchParams(location.search).get("election") || "2023-07-23",
+          archiveMode = "analysis",
+          selectedGraph = null,
+          selectedEntry = null,
+          electionGeneration = 0;
+        if (!window.CYP_ARCHIVE_INDEX.some((e) => e.id === selectedElection)) selectedElection = "2023-07-23";
+        async function renderHemeroteca() {
+          const g = ++electionGeneration,
+            en = CYP.lang === "en",
+            dates = window.CYP_ARCHIVE_INDEX.slice().reverse();
+          $("hem-picker").innerHTML =
+            `<label>${en ? "Election" : "Convocatoria"}<select id="hem-election">${dates.map((e) => `<option value="${e.id}"${e.id === selectedElection ? " selected" : ""}>${new Date(e.date + "T12:00:00").toLocaleDateString(en ? "en-GB" : "es-ES", { day: "numeric", month: "long", year: "numeric" })}</option>`).join("")}</select></label><div class="hem-switch" aria-label="${en ? "Archive view" : "Vista de la hemeroteca"}"><button type="button" data-hem-mode="analysis" aria-pressed="${archiveMode === "analysis"}">${en ? "Analysis" : "Análisis"}</button><button type="button" data-hem-mode="results" aria-pressed="${archiveMode === "results"}">${en ? "Results" : "Resultados"}</button></div>`;
+          $("hem-scope").textContent = "";
+          $("hem-election").onchange = (e) => {
+            selectedElection = e.target.value;
+            const url = new URL(location.href);
+            url.searchParams.set("election", selectedElection);
+            history.replaceState(null, "", url);
+            renderHemeroteca();
+          };
+          document.querySelectorAll("[data-hem-mode]").forEach(
+            (b) =>
+              (b.onclick = () => {
+                archiveMode = b.dataset.hemMode;
+                renderHemeroteca();
+              }),
+          );
+          $("hem-rows").hidden = archiveMode !== "analysis";
+          $("archive-root").hidden = archiveMode !== "results";
+          try {
+            const full = await CYPArchive.getData(selectedElection);
+            if (g !== electionGeneration) return;
+            selectedEntry = CYPArchiveBridge.entry(selectedElection);
+            selectedGraph = CYPArchiveBridge.graph(full, selectedEntry);
+            if (archiveMode === "analysis") renderGraph();
+            else CYPArchive.choose(selectedElection);
+          } catch (error) {
+            if (g === electionGeneration) {
+              $("hem-scope").textContent = en
+                ? "Unable to load this election. Select it again to retry."
+                : "No se pudo cargar esta elección. Vuelve a seleccionarla para reintentar.";
+            }
+          }
+        }
+
+        const hem = {},
+          redraws = [];
+        function renderGraph() {
+          const box = $("hem-rows");
+          box.innerHTML = "";
+          redraws.length = 0;
+          [selectedEntry].filter(Boolean).forEach((e) => {
+            const data = selectedGraph;
+            if (!data) return;
+            const has = (cam, amb) => data.rows.some((r) => r[0] === cam && (!amb || r[1] === amb));
+            const st =
+              hem[e.id] ||
+              (hem[e.id] = {
+                camara: "congreso",
+                fam: Object.fromEntries([...data.families.map((f) => f.id), "OTROS"].map((f) => [f, true])),
+                censo: { electores: true, sobres: false },
+                where: { ES: true, CERA: false },
+                prov: "",
+              });
+            const provs = [...new Set(data.rows.map((r) => r[2].split(":")[0]))].sort((a, b) => a.localeCompare(b, "es"));
+            const chk = (grp, id, label, sw, dis) =>
+              `<label class="chip${dis ? " dis" : ""}"><input type="checkbox" data-g="${grp}" data-id="${id}" ${st[grp][id] && !dis ? "checked" : ""}${dis ? " disabled" : ""}>${sw ? `<span class="sw" style="background:${sw}"></span>` : ""}${label}</label>`;
+            const rad = (id) =>
+              `<label class="${has(id) ? "" : "dis"}"><input type="radio" name="cam-${e.id}" data-cam="${id}" ${st.camara === id ? "checked" : ""}${has(id) ? "" : " disabled"}><span>${T(id)}</span></label>`;
+            const censo = st.camara === "censo";
+            const inner = `<div class="filters">
+          <div class="fg"><div class="radioseg" role="radiogroup" aria-label="${T("hem.camara")}">${rad("congreso")}${rad("senado")}${rad("censo")}</div>${CYP.q("q.camara")}</div>
+          <div class="fg">${
+            censo
+              ? chk("censo", "electores", "electores") + chk("censo", "sobres", "sobres")
+              : data.families.map((f) => chk("fam", f.id, f.id, f.colour)).join("") +
+                chk("fam", "OTROS", T("OTROS"), "var(--muted)") +
+                CYP.q("q.family")
+          }</div>
+          <div class="fg">${chk("where", "ES", CYP.lang === "en" ? "Total (includes CERA)" : "Total (incluye CERA)", null, censo)}${chk("where", "CERA", T("hem.cera"), null, censo || !has(st.camara, "CERA"))}${CYP.q("q.where")}</div>
+          <div class="fg grow"><input type="search" list="pl-${e.id}" data-prov placeholder="${T("hem.prov")}" value="${censo ? "" : CYP.esc(st.prov)}" aria-label="${T("hem.prov")}"${censo ? " disabled" : ""}><datalist id="pl-${e.id}">${provs.map((p) => `<option value="${CYP.esc(p)}">`).join("")}</datalist></div>
+        </div>
+        <p class="hem-scope">${CYP.lang === "en" ? "Parties grouped by political family; each list separately in “Results”." : "Partidos agrupados por familia política; cada candidatura por separado, en «Resultados»."}</p><div class="hem-panel"></div>
+        ${censo ? "" : `<details class="byparty-box" open><summary><span class="plus"></span>${T("hem.byparty")}</summary><div class="byparty"></div></details>`}`;
+            box.insertAdjacentHTML("beforeend", CYP.electionCard(e, data, inner));
+            const row = box.lastElementChild;
+            const panel = new CYP.Panel(row.querySelector(".hem-panel"));
+            const bp = () => {
+              const n = row.querySelector(".byparty");
+              if (n) byParty(n, data, st);
+            };
+            const update = () => {
+              panel.set({ kind: "numbers", records: rowsToRecords(select(data, st)), name: label(st), kicker: e.name });
+              bp();
+            };
+            redraws.push(bp);
+            row.querySelectorAll("input[data-g]").forEach((i) =>
+              i.addEventListener("change", () => {
+                st[i.dataset.g][i.dataset.id] = i.checked;
+                if (i.dataset.g === "where" && i.checked) {
+                  st.where[i.dataset.id === "ES" ? "CERA" : "ES"] = false;
+                  renderGraph();
+                } else update();
+              }),
+            );
+            row.querySelectorAll("input[data-cam]").forEach((i) =>
+              i.addEventListener("change", () => {
+                st.camara = i.dataset.cam;
+                if (!has(st.camara, "CERA")) st.where = { ES: true, CERA: false };
+                renderHemeroteca();
+              }),
+            );
+            const ps = row.querySelector("[data-prov]");
+            ps.addEventListener("input", () => {
+              const v = ps.value.trim();
+              if (!v || provs.includes(v)) {
+                st.prov = v;
+                update();
+              }
+            });
+            ps.addEventListener("change", () => {
+              st.prov = provs.includes(ps.value.trim()) ? ps.value.trim() : "";
+              if (!st.prov) ps.value = "";
+              update();
+            });
+            update();
+          });
+        }
+        function select(data, st, famOnly) {
+          return data.rows.filter(
+            (r) =>
+              r[0] === st.camara &&
+              (!st.prov || st.camara === "censo" || r[2].split(":")[0] === st.prov) &&
+              (st.camara === "censo" ? st.censo[r[3]] : st.where[r[1]] && (famOnly ? r[4] === famOnly : (st.fam[r[4]] ?? st.fam.OTROS))),
+          );
+        }
+        function label(st) {
+          if (st.camara === "censo")
+            return [
+              T("hem.censo"),
+              Object.keys(st.censo)
+                .filter((k) => st.censo[k])
+                .join(" + "),
+            ]
+              .filter(Boolean)
+              .join(" · ");
+          const fams = Object.keys(st.fam).filter((k) => st.fam[k]);
+          const allF = fams.length === Object.keys(st.fam).length;
+          const where = [
+            st.where.ES && (CYP.lang === "en" ? "Total (includes CERA)" : "Total (incluye CERA)"),
+            st.where.CERA && T("hem.cera"),
+          ].filter(Boolean);
+          return (
+            [T(st.camara), allF ? null : fams.map((f) => (f === "OTROS" ? T("OTROS") : f)).join(", "), st.prov || where.join(" + ")]
+              .filter(Boolean)
+              .join(" · ") || "—"
+          );
+        }
+        function byParty(node, data, st) {
+          const fams = [...data.families, { id: "OTROS", colour: CYP.cssVar("--muted") }].filter((f) => st.fam[f.id]);
+          node.innerHTML = fams
+            .map((f) => {
+              const res = CYP.analyse(rowsToRecords(select(data, st, f.id)), {}),
+                t = res.tests.d1,
+                name = f.id === "OTROS" ? T("OTROS") : f.id;
+              const head = `<div class="ph"><b><span class="sw" style="background:${f.colour}"></span>${name}</b><small>n ${CYP.count(res.n)}</small></div>`;
+              if (!t) return `<div class="pcard">${head}</div>`;
+              return `<div class="pcard">${head}${CYP.sparkline(t, f.colour)}<div class="pf">${CYP.sema(t)}<span class="sv">${CYP.sigValue(t)}</span>${CYP.sigQ(t)}</div></div>`;
+            })
+            .join("");
+        }
+        document.addEventListener("cyp:redraw", () => redraws.forEach((f) => f()));
+
+        /* ---------- pruébalo */
+        const tryState = {};
+        const tryPanel = new CYP.Panel($("try-panel"));
+        const opts = () => ({
+          sign: $("opt-sign").value,
+          min: +$("opt-min").value || 0,
+          howMany: Math.max(1, Math.min(10, +$("opt-how").value || 2)),
+          locale: $("opt-locale").value,
+          skipYears: $("opt-years").checked,
+          skipPercent: $("opt-pct").checked,
+        });
+        const setStatus = (m) => {
+          $("status").hidden = !m;
+          $("status").textContent = m || "";
+        };
+        function tryDemo() {
+          const E = EXAMPLES[0];
+          $("opt-sign").value = E.sign;
+          tryState.kind = "demo";
+          tryPanel.set({ kind: "numbers", records: E.records(), opts: { sign: E.sign }, name: E.name, story: E.story });
+        }
+        function rebuild() {
+          const o = opts();
+          if (tryState.table) {
+            tryState.table.locale = o.locale === "auto" ? tryState.table.detected : o.locale;
+            tryState.records = CYP.recordsFromTable(tryState.table);
+          } else if (tryState.text != null) tryState.records = CYP.extractNumbers(tryState.text, o);
+        }
+        function showTry() {
+          if (tryState.kind === "image")
+            return tryPanel.set({ kind: "image", image: tryState.image, name: tryState.name, kicker: T("yours") });
+          if (tryState.kind === "demo") return tryDemo();
+          tryPanel.set({ kind: "numbers", records: tryState.records, opts: opts(), name: tryState.name, kicker: T("yours") });
+        }
+        function renderCols() {
+          const tb = tryState.table;
+          $("cols").hidden = !tb;
+          if (!tb) return;
+          $("cols").innerHTML = tb.numeric
+            .map(
+              (j) =>
+                `<label class="chk"><input type="checkbox" data-col="${j}" ${tb.selected.includes(j) ? "checked" : ""}>${CYP.esc(tb.headers[j])}</label>`,
+            )
+            .join("");
+          $("cols")
+            .querySelectorAll("input")
+            .forEach((cb) =>
+              cb.addEventListener("change", () => {
+                tb.selected = [...$("cols").querySelectorAll("input:checked")].map((x) => +x.dataset.col);
+                rebuild();
+                showTry();
+              }),
+            );
+        }
+        async function handleFile(file) {
+          if (!file) return;
+          const name = file.name,
+            ext = name.split(".").pop().toLowerCase();
+          $("field-text").removeAttribute("data-i18n");
+          $("field-text").textContent = name;
+          setStatus(T("status.reading", { name }));
+          try {
+            const buf = await file.arrayBuffer();
+            Object.assign(tryState, { name, file, table: null, text: null, image: null });
+            if (file.type.startsWith("image/") || ["png", "jpg", "jpeg", "webp", "gif", "bmp"].includes(ext)) {
+              const img = new Image();
+              await new Promise((ok, ko) => {
+                img.onload = ok;
+                img.onerror = () => ko(new Error("img"));
+                img.src = URL.createObjectURL(file);
+              });
+              Object.assign(tryState, { kind: "image", image: img });
+              $("cols").hidden = true;
+              setStatus("");
+              showTry();
+              return;
+            }
+            tryState.kind = "numbers";
+            if (["xlsx", "xls", "ods", "csv", "tsv"].includes(ext)) {
+              setStatus(T("status.lib"));
+              const sheets = await CYP.readSheet(buf);
+              const tb = CYP.tableFromRows(sheets[0].rows, opts());
+              if (!tb || !tb.numeric.length) throw new Error("∅");
+              tb.detected = tb.locale;
+              tryState.table = tb;
+            } else if (ext === "pdf") {
+              setStatus(T("status.lib"));
+              tryState.text = await CYP.readPdfText(buf);
+            } else if (ext === "docx") {
+              setStatus(T("status.lib"));
+              tryState.text = await CYP.readDocxText(buf);
+            } else tryState.text = new TextDecoder().decode(buf);
+            renderCols();
+            rebuild();
+            if (!tryState.records.length) {
+              setStatus(T("status.none", { name }));
+              return;
+            }
+            setStatus(T("status.done", { n: CYP.int(tryState.records.length) }));
+            showTry();
+          } catch (err) {
+            setStatus(T("status.error", { name, msg: err.message || err }));
+          }
+        }
+        $("file-input").addEventListener("change", (e) => handleFile(e.target.files[0]));
+        $("btn-pick").addEventListener("click", () => $("file-input").click());
+        const df = $("dropfield");
+        addEventListener("dragover", (e) => {
+          e.preventDefault();
+          df.classList.add("drag");
+        });
+        addEventListener("dragleave", (e) => {
+          if (!e.relatedTarget) df.classList.remove("drag");
+        });
+        addEventListener("drop", (e) => {
+          e.preventDefault();
+          df.classList.remove("drag");
+          location.hash = "pruebalo";
+          handleFile(e.dataTransfer.files[0]);
+        });
+        ["opt-sign", "opt-min", "opt-how"].forEach((id) =>
+          $(id).addEventListener("change", () => {
+            if (tryState.kind !== "demo") showTry();
+          }),
+        );
+        ["opt-locale", "opt-years", "opt-pct"].forEach((id) =>
+          $(id).addEventListener("change", () => {
+            if (tryState.kind === "numbers") {
+              rebuild();
+              showTry();
+            }
+          }),
+        );
+
+        /* ---------- más info */
+        function renderSources() {
+          const en = CYP.lang === "en";
+          const and = (x) => (en ? x.replace(/ y /g, " and ") : x);
+          $("refs").innerHTML = REFS.map(
+            (r) =>
+              `<li>${RICON[r.k]}<span><b>${and(r.a)}</b> (${r.y}). <i>${r.ti}</i>. ${en ? r.src.replace("Paquete R", "R package") : r.src} ${link(r)}</span></li>`,
+          ).join("");
+          $("authors").innerHTML = AUTHORS.map(
+            ([n, o]) => `<a href="https://orcid.org/${o}" target="_blank" rel="noopener" title="ORCID ${o}">${n}</a>`,
+          ).join(" · ");
+        }
+        function renderDigits() {
+          document.querySelectorAll(".digits-chart").forEach((n) => {
+            if (n.offsetParent) CYP.responsive(n, () => CYP.digitsChart(n));
+          });
+        }
+        let spyPick = null,
+          spyRaf = 0;
+        function spy() {
+          const toc = document.querySelector(`.toc [data-es="${CYP.lang}"]`);
+          if (!toc) return;
+          const links = [...toc.querySelectorAll("a")],
+            targets = links.map((a) => document.getElementById(a.getAttribute("href").slice(1))).filter(Boolean);
+          spyPick = () => {
+            let cur = targets[0];
+            for (const t of targets) if (t.getBoundingClientRect().top < 140) cur = t;
+            if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) cur = targets[targets.length - 1];
+            links.forEach((a) => a.classList.toggle("on", a.getAttribute("href") === "#" + cur.id));
+          };
+          spyPick();
+        }
+        addEventListener(
+          "scroll",
+          () => {
+            if (CYP.route === "info" && spyPick) {
+              cancelAnimationFrame(spyRaf);
+              spyRaf = requestAnimationFrame(spyPick);
+            }
+          },
+          { passive: true },
+        );
+
+        /* ---------- boot */
+        function renderAll() {
+          CYP.applyI18n();
+          $("up-q").innerHTML = CYP.q("q.upload");
+          document.querySelectorAll(".oq[data-q]").forEach((n) => {
+            n.innerHTML = CYP.q(n.dataset.q);
+          });
+          $("field-ic").innerHTML = CYP.ICON.upload;
+          $("btn-pick").innerHTML = CYP.ICON.arrow;
+          $("btn-pick").setAttribute("aria-label", T("try.btn"));
+          $("btn-pick").title = T("try.btn");
+          showExample();
+          renderNext();
+          if (CYP.route === "hemeroteca") renderHemeroteca();
+          showTry();
+          renderSources();
+          tick();
+          if (CYP.route === "info") {
+            renderDigits();
+            spy();
+          }
+        }
+        document.addEventListener("cyp:change", renderAll);
+        tryState.kind = "demo";
+        route();
+        renderAll();
+        setInterval(tick, 1000);
+      })();
+    </script>
+  </body>
+</html>
