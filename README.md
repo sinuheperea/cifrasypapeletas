@@ -6,7 +6,6 @@ Do Spanish election results follow the number pattern predicted by Benford's Law
 |---|---|
 | Sinuhé Perea-Puente | [0000-0002-5869-5701](https://orcid.org/0000-0002-5869-5701) |
 | Yanxue Wang | [0009-0006-5523-5351](https://orcid.org/0009-0006-5523-5351) |
-| André Vellwock | [0000-0001-8296-2032](https://orcid.org/0000-0001-8296-2032) |
 | David Martínez-Rubio | [0000-0002-4345-5422](https://orcid.org/0000-0002-4345-5422) |
 
 ## Pages
